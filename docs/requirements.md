@@ -137,8 +137,8 @@ struct DeploymentInfo {
     name: Option<String>,
     tags: Option<Vec<String>>,
     notes: Option<String>,
-    start: chrono::DateTime<Utc>, // Inferred from the timestamp of first audio file.
-    end: chrono::DateTime<Utc>, // Inferred from the timestamp of last audio file.
+    start: chrono::DateTime<Local>, // Inferred from the timestamp of first audio file.
+    end: chrono::DateTime<Local>, // Inferred from the timestamp of last audio file.
 }
 ```
 
