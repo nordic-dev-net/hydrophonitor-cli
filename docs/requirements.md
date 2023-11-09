@@ -13,7 +13,7 @@ Commands:
                   installation.
   info            Get information about the device.
   debug           DIfferent debugging options for the device.
-  help            Print this message or the help of the given                            subcommand(s).
+  help            Print this message or the help of the given subcommand(s).
 
 Options:
   -h, --help      Print help.
