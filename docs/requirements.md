@@ -88,19 +88,18 @@ The device is attached to the host computer as USB mass storage. It is assumed t
 
 ```
 /output/
-    <timestamp>/
+    <TIMESTAMP>/
         audio/
-            <timestamp>_audio.wav
+            <TIMESTAMP>_audio.wav
             ...
         gps/
-            <timestamp>_gps.json
+            <TIMESTAMP>_gps.json
             ...
         depth/
-            <timestamp>_depth.csv
-            ...
+            <TIMESTAMP>_depth.csv
         log/
-            <timestamp>_journalctl.txt
-    <timestamp>/
+            <TIMESTAMP>_journalctl.txt
+    <TIMESTAMP>/
         ...
 ```
 
@@ -145,12 +144,12 @@ struct DeploymentInfo {
 #### Imported Data Directory Structure
 
 ```
-<timestamp>-<device_name>/
-    meta.json
-    <timestamp>_audio.wav
-    <timestamp>_gps.json
-    <timestamp>_depth.csv
-    <timestamp>_journalctl.txt
+<TIMESTAMP>/
+    metadata.json
+    audio-<TIMESTAMP>-<TIMESTAMP>.wav
+    gps-<TIMESTAMP>-<TIMESTAMP>.csv
+    depth-<TIMESTAMP>-<TIMESTAMP>.csv
+    journalctl-<TIMESTAMP>.log
 ```
 
 ### 2. Clean
