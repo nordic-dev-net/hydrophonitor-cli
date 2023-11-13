@@ -122,7 +122,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d13cdbd5dbb29f9c88095bbdc2590c9cba0d0a1269b983fef6b2cdd7e9f4db1"
 
 [[package]]
-name = "hp-cli"
+name = "hydrophonitor-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
