@@ -35,6 +35,58 @@ pub struct Import {
     pub verbose: bool,
 }
 
+impl Import {
+    pub fn import(&mut self) {
+        println!("Importing audio from SD card at {:?}", self.device);
+
+        if let Some(output_folder) = &self.output {
+            println!("Output folder: {:?}", output_folder);
+            import_from_sd(&mut self.device, Some(output_folder.clone())).unwrap_or_else(|err| {
+                eprintln!("Error: {}", err);
+                std::process::exit(1);
+            });
+        } else {
+            println!("Output folder: current directory");
+            import_from_sd(&mut self.device, None).unwrap_or_else(|err| {
+                eprintln!("Error: {}", err);
+                std::process::exit(1);
+            });
+        }
+
+        // Iterate folders inside output folder. Inside each iterated folder there is
+        // a folder called "audio" which contains the wav files. Merge them into a single
+        // wav file and delete the "audio" folder.
+        let output_folder = match &self.output {
+            Some(output_folder) => output_folder,
+            None => std::env::current_dir().unwrap_or_else(|err| {
+                eprintln!("Error: {}", err);
+                std::process::exit(1);
+            })
+        };
+
+        for entry in WalkDir::new(output_folder.clone()) {
+            let entry = entry.unwrap_or_else(|err| {
+                eprintln!("Error: {}", err);
+                std::process::exit(1);
+            });
+            let path = entry.path();
+            if path.is_dir() {
+                let audio_folder = path.join("audio");
+                if audio_folder.exists() {
+                    merge_wavs(&audio_folder, &PathBuf::from(path)).unwrap_or_else(|err| {
+                        eprintln!("Error: {}", err);
+                        std::process::exit(1);
+                    });
+                    fs::remove_dir_all(audio_folder).unwrap_or_else(|err| {
+                        eprintln!("Error: {}", err);
+                        std::process::exit(1);
+                    });
+                }
+            }
+        }
+    }
+}
+
 pub fn import_from_sd(sd_card: &mut PathBuf, output_folder: Option<PathBuf>) -> Result<(), Box<dyn Error>> {
     let output_folder = match output_folder {
         Some(output_folder) => output_folder,
