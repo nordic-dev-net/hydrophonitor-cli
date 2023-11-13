@@ -22,6 +22,14 @@ pub struct Import {
     #[clap(short, long)]
     pub output: Option<PathBuf>,
 
+    ///Runs a clean after import is complete
+    #[clap(long, action)]
+    pub clean_imported: bool,
+
+    ///Generates compressed previews of audio files.
+    #[clap(long, action)]
+    pub audio_previews: bool,
+
     ///Increases the CLI verbosity
     #[clap(short, long, action)]
     pub verbose: bool,
