@@ -12,8 +12,8 @@ const DATA_FOLDER: &str = "home/pi/data";
 #[derive(Parser, Debug)]
 #[clap(about = "Import audio from an SD card.")]
 pub struct Import {
-    /// Path to the SD card. You can find the path to the SD card by running
-    /// `lsblk` in the terminal.
+    /// Path to USB mass storage or SD where data will be imported from. You can find the path to
+    /// the SD card by running `lsblk` in the terminal.
     #[clap(short, long, required = true)]
     pub device: PathBuf,
 
@@ -22,7 +22,7 @@ pub struct Import {
     #[clap(short, long)]
     pub output: Option<PathBuf>,
 
-    ///Runs a clean after import is complete
+    ///Runs a clean after import is complete.
     #[clap(long, action)]
     pub clean_imported: bool,
 
@@ -30,7 +30,7 @@ pub struct Import {
     #[clap(long, action)]
     pub audio_previews: bool,
 
-    ///Increases the CLI verbosity
+    ///Increases the CLI verbosity.
     #[clap(short, long, action)]
     pub verbose: bool,
 }

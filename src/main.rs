@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 
+use crate::clean::Clean;
 use crate::import::Import;
 
 mod import;
@@ -9,6 +10,7 @@ mod clean;
 #[clap(about = "A tool to record audio on Linux using the command line.")]
 pub enum Commands {
     Import(Import),
+    Clean(Clean),
 }
 
 
@@ -26,5 +28,6 @@ fn main() {
 
     match commands.commands {
         Commands::Import(mut import) => { import.import() }
+        Commands::Clean(mut clean) => { clean.clean() }
     }
 }
