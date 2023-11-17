@@ -12,7 +12,7 @@ Commands:
   flash           Flash a new hydrophonitor device or overwrite an old
                   installation.
   info            Get information about the device.
-  debug           DIfferent debugging options for the device.
+  debug           Different debugging options for the device.
   help            Print this message or the help of the given subcommand(s).
 
 Options:
@@ -24,8 +24,8 @@ Example:
 
 ```
 hp-cli import ~/brygga-1 ~/Deployments --clean-imported
-[SUCCESS] Import deployment 2023-11-09_11:20:00.097196552+02:00 from brygga-1 to /home/kaskelotti/Deployments/2023-11-09_11:20:00.097196552+02:00
-[SUCCESS] Import deployment 2023-11-09_11:20:00.097196552+02:00 from brygga-1 to /home/kaskelotti/Deployments/2023-11-09_11:20:00.097196552+02:00
+[SUCCESS] Import deployment 2023-11-09T10_20_01.041+0200 from brygga-1 to /home/kaskelotti/Deployments/2023-11-09T10_20_01.041+0200
+[SUCCESS] Import deployment 2023-11-09T11_20_00.097+0200 from brygga-1 to /home/kaskelotti/Deployments/2023-11-09T11_20_00.097+0200
 [SUCCESS] Clean device brygga-1
 ```
 
@@ -34,16 +34,16 @@ hp-cli import ~/brygga-1 ~/Deployments --clean-imported
 Timestamp is represented with the following formatting:
 
 ```
-const TIMESTAMP: &str = "%Y-%m-%d_%H:%M:%S.%f%Z";
+const TIMESTAMP: &str = "%Y-%m-%dT%H_%M_%S%.3f%z";
 ```
 
 Which will result in the following representation:
 
 ```
-2023-11-09_11:20:00.097196552+02:00
+2023-11-09T11_20_00.097+0200
 ```
 
-- This timestamp is unique because of fractional seconds (the `%f` format qualifier) in case of spurious power cycles which restart the deployment.
+- This timestamp is unique because of fractional seconds (the `%.3f` format qualifier, decimal fraction of a second with fixed length of 3 digits) in case of spurious power cycles which restart the deployment.
 - Timestamp is in local time with timezone offset appended to the string.
 
 How to correctly obtain the time in Rust:
@@ -51,7 +51,7 @@ How to correctly obtain the time in Rust:
 ```rust
 use chrono::prelude::*;
 
-const TIMESTAMP: &str = "%Y-%m-%d_%H:%M:%S.%f%Z";
+const TIMESTAMP: &str = "%Y-%m-%dT%H_%M_%S%.3f%z";
 
 fn main() {
     let dt = Local::now();
@@ -59,11 +59,15 @@ fn main() {
 }
 ```
 
+How to obtain the time with the `date` command line utility:
+
+```sh
+date +%Y-%m-%dT%H_%M_%S.%3N%z
+```
+
 ## Supported commands
 
 ### 1. Import
-
-Introduces the following command:
 
 ```
 Usage: hp-cli import [Options] --device <DEVICE_PATH> --output <OUTPUT_PATH>
@@ -105,8 +109,6 @@ The device is attached to the host computer as USB mass storage. It is assumed t
 
 All deployments are imported. The idea is that each deployment would be followed by an import and a cleanup that deletes that deployment from the device. However, one outing with the Hydrophonitor could result in several device restart cycles, so we need to support importing several deployments.
 
-Imported files are processed as described below, unless option `--debug-import` is given. In that case, all files and directories will be imported from `/output` directory as such.
-
 An error message will be printed and non-zero exit code returned in case of an error.
 
 #### Data Formats
@@ -137,7 +139,7 @@ struct DeploymentInfo {
     tags: Option<Vec<String>>,
     notes: Option<String>,
     start: chrono::DateTime<Local>, // Inferred from the timestamp of first audio file.
-    end: chrono::DateTime<Local>, // Inferred from the timestamp of last audio file.
+    end: chrono::DateTime<Local>, // Inferred from the timestamp and duration of last audio file.
 }
 ```
 
@@ -153,8 +155,6 @@ struct DeploymentInfo {
 ```
 
 ### 2. Clean
-
-Introduces the following command:
 
 ```
 Usage: hp-cli clean [OPTIONS] --device <DEVICE>
@@ -194,7 +194,7 @@ Options:
 ### 5. Info
 
 ```
-Usage: hp-cli flash [OPTIONS] --device <DEVICE>
+Usage: hp-cli info [OPTIONS] --device <DEVICE>
 
 Options:
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
@@ -208,13 +208,13 @@ Example:
 hp info ~/brygga-1
 MODEL: Raspberry Pi 4
 SOUND_CARD: Scarlett USB 2i2
-DEPLOYMENTS: 2023-11-09_11:55:43.007232607+02:00, 2023-11-09_11:55:53.892493975+02:00
+DEPLOYMENTS: 2023-11-09T11_55_43.007+0200, 2023-11-09T11_55_53.892+0200
 ```
 
 ### 6. Debug
 
 ```
-Usage: hp-cli flash [OPTIONS] --device <DEVICE>
+Usage: hp-cli debug [OPTIONS] --device <DEVICE>
 
 Options:
   --import-raw <OUTPUT_PATH>    Import output folder from the device                                                   as is.
