@@ -36,6 +36,7 @@ pub struct Import {
 }
 
 impl Import {
+    //TODO old logic; has to be changed to match new commands
     pub fn import(&mut self) {
         println!("Importing audio from SD card at {:?}", self.device);
 
@@ -87,6 +88,7 @@ impl Import {
     }
 }
 
+//TODO old logic
 pub fn import_from_sd(sd_card: &mut PathBuf, output_folder: Option<PathBuf>) -> Result<(), Box<dyn Error>> {
     let output_folder = match output_folder {
         Some(output_folder) => output_folder,
@@ -117,6 +119,7 @@ pub fn import_from_sd(sd_card: &mut PathBuf, output_folder: Option<PathBuf>) -> 
     Ok(())
 }
 
+//TODO old logic
 pub fn merge_wavs(input: &std::path::PathBuf, output: &std::path::PathBuf) -> Result<(), Box<dyn Error>> {
     // Read files from input directory
     let mut files = std::fs::read_dir(input)?
