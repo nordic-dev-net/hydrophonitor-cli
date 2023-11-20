@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use log::{error, info, trace, warn};
 
 #[derive(Parser, Debug)]
 #[clap(about = "This command removes all deployment data from the given device's /output path")]
@@ -16,6 +17,6 @@ pub struct Clean {
 
 impl Clean {
     pub fn clean(&self) {
-        println!("Cleaning device at {:?}", self.device);
+        trace!("Cleaning device at {:?}", self.device);
     }
 }

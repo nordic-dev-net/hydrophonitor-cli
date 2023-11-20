@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use log::{info, LevelFilter};
 
 use crate::clean::Clean;
 use crate::import::Import;
@@ -22,8 +23,13 @@ pub struct Cli {
     pub commands: Commands,
 }
 
+fn init_logging() {
+    env_logger::builder().filter_level(LevelFilter::Trace).init();
+    info!("Initialized logging!")
+}
 
 fn main() {
+    init_logging();
     let commands = Cli::parse();
 
     match commands.commands {
