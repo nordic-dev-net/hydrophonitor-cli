@@ -7,6 +7,8 @@ use hound::{WavReader, WavWriter};
 use indicatif::ProgressBar;
 use walkdir::WalkDir;
 
+use crate::logging::init_logging;
+
 const DATA_FOLDER: &str = "home/pi/data";
 
 #[derive(Parser, Debug)]
@@ -38,6 +40,7 @@ pub struct Import {
 impl Import {
     //TODO old logic; has to be changed to match new commands
     pub fn import(&mut self) {
+        init_logging(self.verbose);
         println!("Importing audio from SD card at {:?}", self.device);
 
         if let Some(output_folder) = &self.output {
@@ -168,4 +171,3 @@ pub fn merge_wavs(input: &std::path::PathBuf, output: &std::path::PathBuf) -> Re
     writer.finalize()?;
     Ok(())
 }
-

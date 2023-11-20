@@ -1,7 +1,9 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use log::{error, info, trace, warn};
+use log::trace;
+
+use crate::logging::init_logging;
 
 #[derive(Parser, Debug)]
 #[clap(about = "This command removes all deployment data from the given device's /output path")]
@@ -17,6 +19,7 @@ pub struct Clean {
 
 impl Clean {
     pub fn clean(&self) {
+        init_logging(self.verbose);
         trace!("Cleaning device at {:?}", self.device);
     }
 }
