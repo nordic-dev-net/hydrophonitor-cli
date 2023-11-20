@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use clap::Parser;
 use hound::{WavReader, WavWriter};
 use indicatif::ProgressBar;
+use log::{error, info};
 use walkdir::WalkDir;
 
 use crate::logging::init_logging;
@@ -41,18 +42,18 @@ impl Import {
     //TODO old logic; has to be changed to match new commands
     pub fn import(&mut self) {
         init_logging(self.verbose);
-        println!("Importing audio from SD card at {:?}", self.device);
+        info!("Importing audio from SD card at {:?}", self.device);
 
         if let Some(output_folder) = &self.output {
-            println!("Output folder: {:?}", output_folder);
+            info!("Output folder: {:?}", output_folder);
             import_from_sd(&mut self.device, Some(output_folder.clone())).unwrap_or_else(|err| {
-                eprintln!("Error: {}", err);
+                error!("Error: {}", err);
                 std::process::exit(1);
             });
         } else {
-            println!("Output folder: current directory");
+            info!("Output folder: current directory");
             import_from_sd(&mut self.device, None).unwrap_or_else(|err| {
-                eprintln!("Error: {}", err);
+                error!("Error: {}", err);
                 std::process::exit(1);
             });
         }
@@ -63,14 +64,14 @@ impl Import {
         let output_folder = match self.output.clone() {
             Some(output_folder) => output_folder,
             None => std::env::current_dir().unwrap_or_else(|err| {
-                eprintln!("Error: {}", err);
+                error!("Error: {}", err);
                 std::process::exit(1);
             })
         };
 
         for entry in WalkDir::new(output_folder.clone()) {
             let entry = entry.unwrap_or_else(|err| {
-                eprintln!("Error: {}", err);
+                error!("Error: {}", err);
                 std::process::exit(1);
             });
             let path = entry.path();
@@ -78,11 +79,11 @@ impl Import {
                 let audio_folder = path.join("audio");
                 if audio_folder.exists() {
                     merge_wavs(&audio_folder, &PathBuf::from(path)).unwrap_or_else(|err| {
-                        eprintln!("Error: {}", err);
+                        error!("Error: {}", err);
                         std::process::exit(1);
                     });
                     fs::remove_dir_all(audio_folder).unwrap_or_else(|err| {
-                        eprintln!("Error: {}", err);
+                        error!("Error: {}", err);
                         std::process::exit(1);
                     });
                 }
@@ -96,7 +97,7 @@ pub fn import_from_sd(sd_card: &mut PathBuf, output_folder: Option<PathBuf>) -> 
     let output_folder = match output_folder {
         Some(output_folder) => output_folder,
         None => std::env::current_dir().unwrap_or_else(|err| {
-            eprintln!("Error: {}", err);
+            error!("Error: {}", err);
             std::process::exit(1);
         })
     };
