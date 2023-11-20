@@ -57,7 +57,7 @@ impl Import {
         // Iterate folders inside output folder. Inside each iterated folder there is
         // a folder called "audio" which contains the wav files. Merge them into a single
         // wav file and delete the "audio" folder.
-        let output_folder = match &self.output {
+        let output_folder = match self.output.clone() {
             Some(output_folder) => output_folder,
             None => std::env::current_dir().unwrap_or_else(|err| {
                 eprintln!("Error: {}", err);
