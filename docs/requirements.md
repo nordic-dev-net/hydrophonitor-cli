@@ -80,6 +80,7 @@ Options:
                               files.
   -h, --help                  Displays help for available commands,                                                  all other arguments are ignored.
   -v, --verbose               Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
+
 ```
 
 This command imports data from the given device, creating a new directory for each imported deployment at the specified output path. This command does not remove files from the device.
