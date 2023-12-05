@@ -148,7 +148,7 @@ version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95b3f3e67048839cb0d0781f445682a35113da7121f7c949db0e2be96a4fbece"
 dependencies = [
- "humantime",parse(from_occurrences)
+ "humantime",
  "is-terminal",
  "log",
  "regex",
@@ -493,6 +493,7 @@ name = "windows-targets"
 version = "0.52.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a18201040b24831fbb9e4eb208f8892e1f50a37feb53cc7ff887feb8f50e7cd"
+dependencies = [
  "windows_aarch64_gnullvm 0.52.0",
  "windows_aarch64_msvc 0.52.0",
  "windows_i686_gnu 0.52.0",
