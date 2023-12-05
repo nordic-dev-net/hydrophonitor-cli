@@ -13,13 +13,13 @@ pub struct Clean {
     pub device: PathBuf,
 
     ///Increases the CLI verbosity.
-    #[clap(short, long, parse(from_occurrences))]
-    pub verbose: usize,
+    #[clap(short, long, default_value = "error")]
+    pub verbose: String,
 }
 
 impl Clean {
     pub fn clean(&self) {
-        init_logging(self.verbose);
+        init_logging(&self.verbose);
         info!("Cleaning device at {:?}", self.device);
     }
 }

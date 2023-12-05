@@ -7,7 +7,6 @@ use hound::{WavReader, WavWriter};
 use indicatif::ProgressBar;
 use log::{error, info};
 use walkdir::WalkDir;
-use crate::Commands::Import;
 
 use crate::logging::init_logging;
 
@@ -35,14 +34,14 @@ pub struct Import {
     pub audio_previews: bool,
 
     ///Increases the CLI verbosity.
-    #[clap(short, long, parse(from_occurrences))]
-    pub verbose: usize,
+    #[clap(short, long)]
+    pub verbose: String,
 }
 
 impl Import {
     //TODO old logic; has to be changed to match new commands
     pub fn import(&mut self) {
-        init_logging(self.verbose);
+        init_logging(&self.verbose);
         info!("Importing audio from SD card at {:?}", self.device);
 
         if let Some(output_folder) = &self.output {
