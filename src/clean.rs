@@ -12,7 +12,7 @@ pub struct Clean {
     #[clap(short, long, required = true)]
     pub device: PathBuf,
 
-    ///Increases the CLI verbosity.
+    ///Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
     #[clap(short, long, default_value = "error")]
     pub verbose: String,
 }

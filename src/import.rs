@@ -33,8 +33,8 @@ pub struct Import {
     #[clap(long, action)]
     pub audio_previews: bool,
 
-    ///Increases the CLI verbosity.
-    #[clap(short, long)]
+    ///Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
+    #[clap(short, long, default_value = "error")]
     pub verbose: String,
 }
 
