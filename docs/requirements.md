@@ -79,7 +79,7 @@ Options:
   --audio-previews            Generates compressed previews of audio
                               files.
   -h, --help                  Displays help for available commands,                                                  all other arguments are ignored.
-  -v, --verbose               Increase CLI verbosity.
+  -v, --verbose               Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
 ```
 
 This command imports data from the given device, creating a new directory for each imported deployment at the specified output path. This command does not remove files from the device.
@@ -162,7 +162,7 @@ Usage: hp-cli clean [OPTIONS] --device <DEVICE>
 Options:
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
   -h, --help            Displays help for available commands. All                                              other arguments are ignored.
-  -v, --verbose         Increase CLI verbosity.
+  -v, --verbose         Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
 ```
 
 This command removes all deployment data from the given device's `/output` path. Before starting the removal, the CLI displays all deployments it has detected and prompts the user to confirm that these deployments will be deleted.
@@ -177,7 +177,7 @@ Usage: hp-cli update [OPTIONS] --device <DEVICE>
 Options:
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
   -h, --help            Displays help for available commands. All                                              other arguments are ignored.
-  -v, --verbose         Increase CLI verbosity.
+  -v, --verbose         Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
 ```
 
 ### 4. Flash
@@ -188,7 +188,7 @@ Usage: hp-cli flash [OPTIONS] --device <DEVICE>
 Options:
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
   -h, --help            Displays help for available commands. All                                              other arguments are ignored.
-  -v, --verbose         Increase CLI verbosity.
+  -v, --verbose         Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
 ```
 
 ### 5. Info
@@ -199,7 +199,7 @@ Usage: hp-cli info [OPTIONS] --device <DEVICE>
 Options:
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
   -h, --help            Displays help for available commands. All                                              other arguments are ignored.
-  -v, --verbose         Increase CLI verbosity.
+  -v, --verbose         Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
 ```
 
 Example:
@@ -220,6 +220,6 @@ Options:
   --import-raw <OUTPUT_PATH>    Import output folder from the device                                                   as is.
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
   -h, --help            Displays help for available commands. All                                              other arguments are ignored.
-  -v, --verbose         Increase CLI verbosity.
+  -v, --verbose         Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
 ```
 
