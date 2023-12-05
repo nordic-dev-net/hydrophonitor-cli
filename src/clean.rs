@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use log::trace;
+use log::info;
 
 use crate::logging::init_logging;
 
@@ -13,13 +13,13 @@ pub struct Clean {
     pub device: PathBuf,
 
     ///Increases the CLI verbosity.
-    #[clap(short, long, action)]
-    pub verbose: bool,
+    #[clap(short, long, parse(from_occurrences))]
+    pub verbose: usize,
 }
 
 impl Clean {
     pub fn clean(&self) {
         init_logging(self.verbose);
-        trace!("Cleaning device at {:?}", self.device);
+        info!("Cleaning device at {:?}", self.device);
     }
 }

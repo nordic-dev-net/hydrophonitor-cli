@@ -7,6 +7,7 @@ use hound::{WavReader, WavWriter};
 use indicatif::ProgressBar;
 use log::{error, info};
 use walkdir::WalkDir;
+use crate::Commands::Import;
 
 use crate::logging::init_logging;
 
@@ -34,8 +35,8 @@ pub struct Import {
     pub audio_previews: bool,
 
     ///Increases the CLI verbosity.
-    #[clap(short, long, action)]
-    pub verbose: bool,
+    #[clap(short, long, parse(from_occurrences))]
+    pub verbose: usize,
 }
 
 impl Import {

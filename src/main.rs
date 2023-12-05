@@ -29,7 +29,8 @@ fn main() {
 
 
     match commands.commands {
-        Commands::Import(mut import) => { import.import() }
+        Commands::Import(mut import) => {
+            import.import() }
         Commands::Clean(mut clean) => { clean.clean() }
     }
 }
