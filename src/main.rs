@@ -28,16 +28,13 @@ pub struct Cli {
 
 
 fn main() {
-    let commands = Cli::parse().commands;
-    let verbose = Cli::parse().verbose;
+    let Cli { commands, verbose } = Cli::parse();
 
     env_logger::builder().filter_level(verbose.log_level_filter()).init();
 
     match commands {
-        Commands::Import(mut import) => {
-            import.import()
-        }
-        Commands::Clean(mut clean) => { clean.clean() }
+        Commands::Import(mut import) => import.import(),
+        Commands::Clean(mut clean) => clean.clean(),
     }
 }
 
