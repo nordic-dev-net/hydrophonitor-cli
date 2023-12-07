@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::PathBuf;
 
 use clap::Parser;
@@ -12,24 +13,24 @@ pub struct Clean {
 }
 
 impl Clean {
-    pub fn clean(&mut self) {
+    pub fn clean(&self) {
         info!("Cleaning device at {:?}", &self.device);
-        self.device.push("output");
+        let mut output_folder = self.device.clone();
+        output_folder.push("output");
 
-        // Attempt to open the directory
-        match self.device.read_dir() {
-            Ok(entries) => {
-                // Iterate over the entries in the directory
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        // Print the name of each entry
-                        println!("{}", entry.file_name().to_string_lossy());
-                    }
-                }
-            }
+        match fs::remove_dir_all(&output_folder) {
+            Ok(_) => {}
             Err(e) => {
-                error!("Error opening the output folder of the device at {:?}: {}", &self.device, e);
+                error!("Removing everything in directory {:?} failed: {}", &output_folder, e);
+                return;
             }
-        }
+        };
+        match fs::create_dir(output_folder) {
+            Ok(_) => {}
+            Err(e) => {
+                error!("Creating new output directory in {:?} failed: {}", &self.device, e);
+                return;
+            }
+        };
     }
 }
