@@ -8,8 +8,6 @@ use indicatif::ProgressBar;
 use log::{error, info};
 use walkdir::WalkDir;
 
-use crate::logging::init_logging;
-
 const DATA_FOLDER: &str = "home/pi/data";
 
 #[derive(Parser, Debug)]
@@ -32,16 +30,11 @@ pub struct Import {
     ///Generates compressed previews of audio files.
     #[clap(long, action)]
     pub audio_previews: bool,
-
-    ///Sets the CLI verbosity. Allowed values are 'error', 'warn', 'info', 'debug' and 'trace'.
-    #[clap(short, long, default_value = "error")]
-    pub verbose: String,
 }
 
 impl Import {
     //TODO old logic; has to be changed to match new commands
     pub fn import(&mut self) {
-        init_logging(&self.verbose);
         info!("Importing audio from SD card at {:?}", self.device);
 
         if let Some(output_folder) = &self.output {

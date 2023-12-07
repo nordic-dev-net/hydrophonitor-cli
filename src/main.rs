@@ -1,11 +1,11 @@
 use clap::{Parser, Subcommand};
+use clap_verbosity_flag::Verbosity;
 
 use crate::clean::Clean;
 use crate::import::Import;
 
 mod import;
 mod clean;
-mod logging;
 
 #[derive(Subcommand)]
 #[clap(about = "A tool to record audio on Linux using the command line.")]
@@ -21,16 +21,22 @@ pub enum Commands {
 pub struct Cli {
     #[clap(subcommand)]
     pub commands: Commands,
+
+    #[command(flatten)]
+    pub verbose: Verbosity,
 }
 
 
 fn main() {
-    let commands = Cli::parse();
+    let commands = Cli::parse().commands;
+    let verbose = Cli::parse().verbose;
 
+    env_logger::builder().filter_level(verbose.log_level_filter()).init();
 
-    match commands.commands {
+    match commands {
         Commands::Import(mut import) => {
-            import.import() }
+            import.import()
+        }
         Commands::Clean(mut clean) => { clean.clean() }
     }
 }
