@@ -72,6 +72,9 @@ fn save_device(device: &String) {
             return;
         }
     }
+
+    //TODO mount device
+
     let mut file = File::create(file_path).expect("Error while creating the file!");
     file.write_all(device.as_ref()).expect("Error while writing device path to file!");
 }
