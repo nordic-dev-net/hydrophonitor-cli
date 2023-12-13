@@ -2,16 +2,19 @@ use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
 
 use crate::clean::Clean;
+use crate::connect::Connect;
 use crate::import::Import;
 
 mod import;
 mod clean;
+mod connect;
 
 #[derive(Subcommand)]
 #[clap(about = "A tool to record audio on Linux using the command line.")]
 pub enum Commands {
     Import(Import),
     Clean(Clean),
+    Connect(Connect),
 }
 
 
@@ -38,6 +41,7 @@ fn main() {
             import.import()
         }
         Commands::Clean(mut clean) => { clean.clean() }
+        Commands::Connect(mut connect) => connect.connect()
     }
 }
 
