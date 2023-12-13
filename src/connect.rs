@@ -1,9 +1,11 @@
-use std::io;
+use std::{fs, io};
+use std::fs::File;
+use std::io::Write;
 use std::process::Command;
 
 use clap::Parser;
 use dialoguer::Select;
-use log::debug;
+use dirs::home_dir;
 
 #[derive(Parser, Debug)]
 #[clap(about = "Connects to a device")]
@@ -14,7 +16,7 @@ impl Connect {
         let devices = get_device_list();
         let mut selected_device = &String::new();
         for device in devices.iter() {
-            if device.contains("snap") {
+            if device.to_lowercase().contains("nixos") {
                 selected_device = device;
                 break;
             }
@@ -24,14 +26,16 @@ impl Connect {
             let mut user_input = String::new();
             io::stdin().read_line(&mut user_input).expect("Failed to read line!");
             match user_input.trim().to_lowercase().as_str() {
-                "y" | "yes" => mount_device(selected_device),
-                "n" | "no" => manual_connect(&devices),
+                "y" | "yes" => {}
+                "n" | "no" => selected_device = manual_connect(&devices),
                 _ => println!("Invalid response. Please enter 'y' or 'n'."),
             }
         } else {
             println!("No device found matching the Hydrophonitor disk.");
-            manual_connect(&devices);
+            selected_device = manual_connect(&devices);
         }
+
+        save_device(selected_device);
     }
 }
 
@@ -45,16 +49,29 @@ fn get_device_list() -> Vec<String> {
         let cropped_device = device.split(" ").last().unwrap_or_default().to_string();
         devices_cropped.push(cropped_device);
     }
-    debug!("devices: {:?}", devices);
     devices_cropped
 }
 
-fn manual_connect(devices: &Vec<String>) {
+fn manual_connect(devices: &Vec<String>) -> &String {
     let selection = Select::new()
         .with_prompt("Please choose a device from the list:")
         .items(&devices)
         .default(0)
         .interact();
+    &devices[selection.unwrap_or_default()]
 }
 
-fn mount_device(device: &String) {}
+fn save_device(device: &String) {
+    let file_path = home_dir().unwrap().join(".hydrophonitor");
+
+    println!("connecting_to_device device {device}!");
+    match fs::read_dir(format!("{device}/output")) {
+        Ok(_) => {}
+        Err(_) => {
+            println! {"The selected device does not have a valid output directory!"};
+            return;
+        }
+    }
+    let mut file = File::create(file_path).expect("Error while creating the file!");
+    file.write_all(device.as_ref()).expect("Error while writing device path to file!");
+}
