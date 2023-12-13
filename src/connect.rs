@@ -2,6 +2,7 @@ use std::io;
 use std::process::Command;
 
 use clap::Parser;
+use dialoguer::Select;
 use log::debug;
 
 #[derive(Parser, Debug)]
@@ -27,18 +28,22 @@ impl Connect {
             io::stdin().read_line(&mut user_input).expect("Failed to read line!");
             match user_input.trim().to_lowercase().as_str() {
                 "y" | "yes" => mount_device(selected_device),
-                "n" | "no" => manual_connect(),
+                "n" | "no" => manual_connect(&devices),
                 _ => println!("Invalid response. Please enter 'y' or 'n'."),
             }
         } else {
             println!("No device found matching the Hydrophonitor disk.");
-            manual_connect()
+            manual_connect(&devices);
         }
     }
 }
 
-fn manual_connect() {
-    println!("Please choose a device from the list:");
+fn manual_connect(devices: &Vec<&str>) {
+    let selection = Select::new()
+        .with_prompt("Please choose a device from the list:")
+        .items(&devices)
+        .default(0)
+        .interact();
 }
 
 fn mount_device(device: &str) {}
