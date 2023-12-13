@@ -11,14 +11,11 @@ pub struct Connect {}
 
 impl Connect {
     pub fn connect(&mut self) {
-        let output = Command::new("lsblk").output().expect("Failed to run lsblk!");
-        let output = String::from_utf8_lossy(&output.stdout);
-        let devices: Vec<&str> = output.lines().collect();
-        debug!("devices: {:?}", devices);
-        let mut selected_device = "";
+        let devices = get_device_list();
+        let mut selected_device = &String::new();
         for device in devices.iter() {
             if device.contains("snap") {
-                selected_device = device.split(" ").last().unwrap_or_default();
+                selected_device = device;
                 break;
             }
         }
@@ -38,7 +35,21 @@ impl Connect {
     }
 }
 
-fn manual_connect(devices: &Vec<&str>) {
+//gets all available devices with lsblk
+fn get_device_list() -> Vec<String> {
+    let output = Command::new("lsblk").output().expect("Failed to run lsblk!");
+    let output = String::from_utf8_lossy(&output.stdout);
+    let devices: Vec<&str> = output.lines().collect();
+    let mut devices_cropped: Vec<String> = Vec::new();
+    for device in devices.iter() {
+        let cropped_device = device.split(" ").last().unwrap_or_default().to_string();
+        devices_cropped.push(cropped_device);
+    }
+    debug!("devices: {:?}", devices);
+    devices_cropped
+}
+
+fn manual_connect(devices: &Vec<String>) {
     let selection = Select::new()
         .with_prompt("Please choose a device from the list:")
         .items(&devices)
@@ -46,4 +57,4 @@ fn manual_connect(devices: &Vec<&str>) {
         .interact();
 }
 
-fn mount_device(device: &str) {}
+fn mount_device(device: &String) {}
