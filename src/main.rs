@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_verbosity_flag::Verbosity;
 
 use crate::clean::Clean;
 use crate::import::Import;
@@ -20,14 +21,20 @@ pub enum Commands {
 pub struct Cli {
     #[clap(subcommand)]
     pub commands: Commands,
+
+    #[command(flatten)]
+    pub verbose: Verbosity,
 }
 
 
 fn main() {
-    let commands = Cli::parse();
+    let Cli { commands, verbose } = Cli::parse();
 
-    match commands.commands {
-        Commands::Import(mut import) => { import.import() }
-        Commands::Clean(mut clean) => { clean.clean() }
+    env_logger::builder().filter_level(verbose.log_level_filter()).init();
+
+    match commands {
+        Commands::Import(mut import) => import.import(),
+        Commands::Clean(mut clean) => clean.clean(),
     }
 }
+

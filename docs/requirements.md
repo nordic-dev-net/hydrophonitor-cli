@@ -80,6 +80,7 @@ Options:
                               files.
   -h, --help                  Displays help for available commands,                                                  all other arguments are ignored.
   -v, --verbose               Increase CLI verbosity.
+
 ```
 
 This command imports data from the given device, creating a new directory for each imported deployment at the specified output path. This command does not remove files from the device.
