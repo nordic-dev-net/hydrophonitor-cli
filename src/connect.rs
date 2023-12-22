@@ -120,7 +120,7 @@ fn create_dir_if_not_existing(dir_path: &PathBuf) {
     match fs::create_dir(dir_path) {
         Ok(_) => {}
         Err(e) => {
-            if e.kind() != io::ErrorKind::AlreadyExists {
+            if e.kind() != ErrorKind::AlreadyExists {
                 panic!("{}", e)
             }
         }
