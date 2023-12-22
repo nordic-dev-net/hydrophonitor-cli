@@ -1,3 +1,5 @@
+extern crate nix;
+
 use std::{fs, io, process};
 use std::io::ErrorKind;
 use std::path::PathBuf;
@@ -7,7 +9,8 @@ use clap::Parser;
 use dialoguer::Select;
 use dirs::home_dir;
 use log::debug;
-use sys_mount::{Mount, Unmount, UnmountFlags};
+use nix::mount;
+use sys_mount::{Mount, unmount, UnmountFlags};
 
 #[derive(Parser, Debug)]
 #[clap(about = "Connects to a device")]
@@ -95,21 +98,32 @@ fn manual_connect(devices: &Vec<String>) -> &String {
 
 fn mount_device(device: &String) {
     let mount_path = home_dir().unwrap().join(".hydrophonitor");
+    let device_path = PathBuf::from(format!("/dev/{device}"));
 
     //TODO unmount device if already mounted
     create_dir_if_not_existing(&mount_path);
 
-    let device_path = format!("/dev/{device}");
-    let mount = Mount::builder().mount(&device_path, &mount_path).expect("Mount failed");
+    mount::mount(
+        Some(&device_path),
+        &mount_path,
+        Some("ext4"),
+        mount::MsFlags::empty(),
+        None::<&str>,
+    ).expect("Failed to mount the device");
 
     match fs::read_dir(format!("{}/output", mount_path.to_str().unwrap())) {
         Ok(_) => println!("successfully connected to device {device}!"),
         Err(_) => {
             println! {"The selected device does not have a valid output directory!"};
-            mount.into_unmount_drop(UnmountFlags::DETACH);
+            unmount_device(&device_path);
             return;
         }
     }
+}
+
+fn unmount_device(path: &PathBuf) {
+    //TODO convert to static file wide variable
+    unmount(&path, UnmountFlags::empty()).expect("Failed to unmount device!");
 }
 
 fn create_dir_if_not_existing(dir_path: &PathBuf) {

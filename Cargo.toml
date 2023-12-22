@@ -17,3 +17,4 @@ clap-verbosity-flag = "2.1.0"
 dialoguer = "0.11.0"
 dirs = "5.0.1"
 sys-mount = "2.1.0"
+nix = { version = "0.27.1", features = ["mount"] }
