@@ -1,7 +1,6 @@
 extern crate nix;
 
 use std::{fs, io, process};
-use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -9,8 +8,8 @@ use clap::Parser;
 use dialoguer::Select;
 use dirs::home_dir;
 use log::debug;
+use nix::errno::Errno;
 use nix::mount;
-use sys_mount::{Mount, unmount, UnmountFlags};
 
 #[derive(Parser, Debug)]
 #[clap(about = "Connects to a device")]
@@ -64,23 +63,31 @@ fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
 
     //Checking all devices for an output directory
     for device in devices.iter() {
-        let device_path = format!("/dev/{device}");
-        match Mount::builder()
-            .mount_autodrop(&device_path, &mount_path, UnmountFlags::DETACH) {
-            Ok(_) =>
-                {
-                    let read_dir_result = fs::read_dir(format!("{}/output", mount_path.to_str().unwrap()));
-                    match read_dir_result {
-                        Ok(_) => { return Some(device); }
-                        Err(_) => {}
+        let device_path = PathBuf::from(format!("/dev/{device}"));
+
+        match mount::mount(
+            Some(&device_path),
+            &mount_path,
+            Some("ext4"),
+            mount::MsFlags::empty(),
+            None::<&str>,
+        ) {
+            Ok(_) => {
+                let read_dir_result = fs::read_dir(format!("{}/output", mount_path.to_str().unwrap()));
+                match read_dir_result {
+                    Ok(_) => {
+                        unmount_device(&mount_path);
+                        return Some(device);
                     }
+                    Err(_) => {}
                 }
+            }
             Err(e) => {
-                if e.kind() == ErrorKind::PermissionDenied {
+                if e == Errno::EPERM {
                     println!("Please execute the connect command with sudo rights!");
-                    process::exit(1)
+                    process::exit(1);
                 }
-                debug!("Mount of device {device_path} failed: {e}")
+                debug!("Mount of device {:?} failed: {}", device_path, e);
             }
         }
     }
@@ -122,8 +129,7 @@ fn mount_device(device: &String) {
 }
 
 fn unmount_device(path: &PathBuf) {
-    //TODO convert to static file wide variable
-    unmount(&path, UnmountFlags::empty()).expect("Failed to unmount device!");
+    mount::umount2(path, mount::MntFlags::MNT_FORCE).expect(format!("Failed to unmount device {:?}!", path).as_str())
 }
 
 fn create_dir_if_not_existing(dir_path: &PathBuf) {
