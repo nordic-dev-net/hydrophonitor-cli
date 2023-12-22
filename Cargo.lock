@@ -208,6 +208,18 @@ dependencies = [
  "clap-verbosity-flag",
  "env_logger",
  "hound",
+ "hydrophonitor-lib",
+ "indicatif",
+ "log",
+ "walkdir",
+]
+
+[[package]]
+name = "hydrophonitor-lib"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "hound",
  "indicatif",
  "log",
  "walkdir",
