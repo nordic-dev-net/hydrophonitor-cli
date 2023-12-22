@@ -7,7 +7,7 @@ use clap::Parser;
 use dialoguer::Select;
 use dirs::home_dir;
 use log::debug;
-use sys_mount::{Mount, Unmount, UnmountFlags};
+use sys_mount::{Mount, Unmount, unmount, UnmountFlags};
 
 #[derive(Parser, Debug)]
 #[clap(about = "Connects to a device")]
@@ -96,7 +96,10 @@ fn manual_connect(devices: &Vec<String>) -> &String {
 fn mount_device(device: &String) {
     let mount_path = home_dir().unwrap().join(".hydrophonitor");
 
-    //TODO unmount device if already mounted
+    match unmount(&mount_path, UnmountFlags::empty()) {
+        Ok(_) => debug!("unmounting previously mounted device at {:?}", mount_path),
+        Err(_) => {}
+    }
     create_dir_if_not_existing(&mount_path);
 
     let device_path = format!("/dev/{device}");
@@ -111,6 +114,7 @@ fn mount_device(device: &String) {
         }
     }
 }
+
 
 fn create_dir_if_not_existing(dir_path: &PathBuf) {
     match fs::create_dir(dir_path) {
