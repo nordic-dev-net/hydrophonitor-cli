@@ -66,18 +66,7 @@ pub fn mount_device(device: &String) {
     create_dir_if_not_existing(&*MOUNT_PATH);
 
     let device_path = format!("/dev/{device}");
-    let mount = Mount::builder().mount(&device_path, &*MOUNT_PATH).expect("Mount failed");
-
-    match fs::read_dir(format!("{}/output", MOUNT_PATH.to_str().unwrap())) {
-        Ok(_) => {
-            println!("successfully connected to device {device}!")
-        }
-        Err(_) => {
-            println! {"The selected device does not have a valid output directory!"};
-            mount.into_unmount_drop(UnmountFlags::DETACH);
-            return;
-        }
-    }
+    Mount::builder().mount(&device_path, &*MOUNT_PATH).expect("Mount failed");
 }
 
 

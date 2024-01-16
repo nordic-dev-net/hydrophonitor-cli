@@ -31,6 +31,7 @@ impl Connect {
         }
 
         connect_lib::mount_device(selected_device);
+        println!("successfully connected to device {device}!")
     }
 }
 
