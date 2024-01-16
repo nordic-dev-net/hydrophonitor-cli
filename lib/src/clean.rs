@@ -1,56 +1,26 @@
-use std::{fs, io};
+use std::fs;
 use std::path::PathBuf;
-use log::{error, info};
 
-pub fn clean(device: &PathBuf) {
-    info!("Cleaning device at {:?}", &device);
-    let device = device.clone().push("output");
-
-    // Attempt to open the directory
-    match fs::read_dir(&device) {
-        Ok(entries) => {
+pub fn get_deployments_of_device(output_dir: &PathBuf) -> Vec<String> {
+    match fs::read_dir(&output_dir) {
+        Ok(dir) => {
+            let mut entries = Vec::new();
             // Iterate over the entries in the directory
-            let mut entries_found = false;
-            for entry in entries {
+            for entry in dir {
                 if let Ok(entry) = entry {
-                    // Print the name of each entry
-                    println!("{}", entry.file_name().to_string_lossy());
-                    entries_found = true;
+                    // Add the name of each entry to the Vector
+                    entries.push(entry.file_name().into_string().unwrap());
                 }
             }
-            if entries_found {
-                println!("Do you really want to delete these entries? (y/n)");
-                let mut user_input = String::new();
-                io::stdin().read_line(&mut user_input).expect("Failed to read line");
-                if !(user_input.contains("y") || user_input.contains("Y")) {
-                    println!("Aborting!");
-                    return;
-                }
-            } else {
-                println!("The directory is already empty!");
-                return;
-            }
+            return entries;
         }
         Err(e) => {
-            error!("Error opening the directory {:?}: {}", &device, e);
-            return;
+            panic!("Error opening the directory {:?}: {}", output_dir, e);
         }
     }
+}
 
-    match fs::remove_dir_all(&device) {
-        Ok(_) => {}
-        Err(e) => {
-            error!("Removing everything in directory {:?} failed: {}", &device, e);
-            return;
-        }
-    };
-    match fs::create_dir(&device) {
-        Ok(_) => {}
-        Err(e) => {
-            error!("Creating new output directory in {:?} failed: {}", &device, e);
-            return;
-        }
-    };
-
-    println!("Successfully cleaned directory!")
+pub fn clear_directory(output_dir: &PathBuf) {
+    fs::remove_dir_all(&output_dir).expect(&*format!("Removing everything in directory {:?} failed!", &output_dir));
+    fs::create_dir(&output_dir).expect(&*format!("Creating new empty output directory in {:?} failed!", &output_dir));
 }
