@@ -16,11 +16,16 @@ pub struct Clean {
 
 impl Clean {
     pub fn clean(&mut self) {
+        // Checking device for output folder
         info!("Cleaning device at {:?}", self.device);
         let mut output_dir = self.device.clone();
         output_dir.push("output");
+        if !output_dir.is_dir() {
+            println!("{:?} is not a valid device! please select a hydrophonitor device with output folder!", output_dir);
+            return;
+        }
 
-        // Show deployments and ask for confirmation
+        // Showing deployments and asking for confirmation
         let deployments = clean_lib::get_deployments_of_device(&output_dir);
         if !deployments.is_empty() {
             dbg!(deployments);
@@ -36,6 +41,7 @@ impl Clean {
             return;
         }
 
+        // Cleaning device
         clean_lib::clear_directory(&output_dir);
         println!("Successfully cleaned directory!")
     }

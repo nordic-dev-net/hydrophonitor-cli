@@ -5,7 +5,7 @@ use std::process::Command;
 
 use lazy_static::lazy_static;
 use log::debug;
-use sys_mount::{Mount, Unmount, unmount, UnmountFlags};
+use sys_mount::{Mount, unmount, UnmountFlags};
 
 lazy_static! {
 static ref MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/device");
