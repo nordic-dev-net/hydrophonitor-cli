@@ -10,7 +10,7 @@ use hydrophonitor_lib::clean as clean_lib;
 #[clap(about = "This command removes all deployment data from the given device's /output path")]
 pub struct Clean {
     ///Path to USB mass storage or SD card where data will be deleted from.
-    #[clap(short, long, required = true)]
+    #[clap(short, long, default_value = "/var/lib/hydrophonitor/device")]
     device: PathBuf,
 }
 
@@ -20,7 +20,7 @@ impl Clean {
         let mut output_dir = self.device.clone();
         output_dir.push("output");
 
-        // Show deployments and as for confirmation
+        // Show deployments and ask for confirmation
         let deployments = clean_lib::get_deployments_of_device(&output_dir);
         if !deployments.is_empty() {
             dbg!(deployments);

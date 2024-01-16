@@ -3,9 +3,14 @@ use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::process::Command;
 
-use dirs::home_dir;
+use lazy_static::lazy_static;
 use log::debug;
 use sys_mount::{Mount, Unmount, unmount, UnmountFlags};
+
+lazy_static! {
+static ref MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/device");
+static ref TEMP_MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/temp_device");
+}
 
 //gets all available devices with lsblk
 pub fn get_device_list() -> Vec<String> {
@@ -25,17 +30,16 @@ pub fn get_device_list() -> Vec<String> {
 }
 
 pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
-    let mount_path = home_dir().unwrap().join(".temp_hydrophonitor");
-    create_dir_if_not_existing(&mount_path);
+    create_dir_if_not_existing(&*TEMP_MOUNT_PATH);
 
     //Checking all devices for an output directory
     for device in devices.iter() {
         let device_path = format!("/dev/{device}");
         match Mount::builder()
-            .mount_autodrop(&device_path, &mount_path, UnmountFlags::DETACH) {
+            .mount_autodrop(&device_path, &*TEMP_MOUNT_PATH, UnmountFlags::DETACH) {
             Ok(_) =>
                 {
-                    let read_dir_result = fs::read_dir(format!("{}/output", mount_path.to_str().unwrap()));
+                    let read_dir_result = fs::read_dir(format!("{}/output", TEMP_MOUNT_PATH.to_str().unwrap()));
                     match read_dir_result {
                         Ok(_) => { return Some(device); }
                         Err(_) => {}
@@ -55,19 +59,19 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
 
 
 pub fn mount_device(device: &String) {
-    let mount_path = home_dir().unwrap().join(".hydrophonitor");
-
-    match unmount(&mount_path, UnmountFlags::empty()) {
-        Ok(_) => debug!("unmounting previously mounted device at {:?}", mount_path),
+    match unmount(&*MOUNT_PATH, UnmountFlags::empty()) {
+        Ok(_) => debug!("unmounting previously mounted device at {:?}", &*MOUNT_PATH),
         Err(_) => {}
     }
-    create_dir_if_not_existing(&mount_path);
+    create_dir_if_not_existing(&*MOUNT_PATH);
 
     let device_path = format!("/dev/{device}");
-    let mount = Mount::builder().mount(&device_path, &mount_path).expect("Mount failed");
+    let mount = Mount::builder().mount(&device_path, &*MOUNT_PATH).expect("Mount failed");
 
-    match fs::read_dir(format!("{}/output", mount_path.to_str().unwrap())) {
-        Ok(_) => println!("successfully connected to device {device}!"),
+    match fs::read_dir(format!("{}/output", MOUNT_PATH.to_str().unwrap())) {
+        Ok(_) => {
+            println!("successfully connected to device {device}!")
+        }
         Err(_) => {
             println! {"The selected device does not have a valid output directory!"};
             mount.into_unmount_drop(UnmountFlags::DETACH);
@@ -78,7 +82,7 @@ pub fn mount_device(device: &String) {
 
 
 fn create_dir_if_not_existing(dir_path: &PathBuf) {
-    match fs::create_dir(dir_path) {
+    match fs::create_dir_all(dir_path) {
         Ok(_) => {}
         Err(e) => {
             if e.kind() != ErrorKind::AlreadyExists {

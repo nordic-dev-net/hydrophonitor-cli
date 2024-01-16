@@ -10,11 +10,12 @@ hydrophonitor-lib = { path = "../lib" }
 anyhow.workspace = true
 clap.workspace = true
 clap-verbosity-flag.workspace = true
-dialoguer.workspace=true
-dirs.workspace=true
+dialoguer.workspace = true
+dirs.workspace = true
 env_logger.workspace = true
 hound.workspace = true
 indicatif.workspace = true
+lazy_static.workspace = true
 log.workspace = true
 sys-mount.workspace = true
 walkdir.workspace = true
