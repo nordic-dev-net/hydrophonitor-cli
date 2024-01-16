@@ -354,9 +354,11 @@ name = "hydrophonitor-lib"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "dirs",
  "hound",
  "indicatif",
  "log",
+ "sys-mount",
  "walkdir",
 ]
 

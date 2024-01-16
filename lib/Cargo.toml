@@ -7,7 +7,9 @@ edition = "2021"
 
 [dependencies]
 anyhow.workspace = true
+dirs.workspace = true
 hound.workspace = true
 indicatif.workspace = true
 log.workspace = true
+sys-mount.wokspace = true
 walkdir.workspace = true
