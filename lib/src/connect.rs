@@ -47,7 +47,7 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
                 }
             Err(e) => {
                 if e.kind() == ErrorKind::PermissionDenied {
-                    println!("Please execute the connect command with sudo rights!");
+                    println!("Please execute the command with sudo rights or specify a device path with access rights!");
                     process::exit(1)
                 }
                 debug!("Mount of device {device_path} failed: {e}")
