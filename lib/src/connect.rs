@@ -5,10 +5,10 @@ use std::process::Command;
 
 use lazy_static::lazy_static;
 use log::debug;
-use sys_mount::{Mount, unmount, UnmountFlags};
+use sys_mount::{Mount, unmount, UnmountDrop, UnmountFlags};
 
 lazy_static! {
-static ref MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/device");
+pub static ref MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/device");
 static ref TEMP_MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/temp_device");
 }
 
@@ -57,8 +57,7 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
     None
 }
 
-
-pub fn mount_device(device: &String) {
+pub fn mount_device(device: &String) -> UnmountDrop<Mount> {
     match unmount(&*MOUNT_PATH, UnmountFlags::empty()) {
         Ok(_) => debug!("unmounting previously mounted device at {:?}", &*MOUNT_PATH),
         Err(_) => {}
@@ -66,7 +65,7 @@ pub fn mount_device(device: &String) {
     create_dir_if_not_existing(&*MOUNT_PATH);
 
     let device_path = format!("/dev/{device}");
-    Mount::builder().mount(&device_path, &*MOUNT_PATH).expect("Mount failed");
+    return Mount::builder().mount_autodrop(&device_path, &*MOUNT_PATH, UnmountFlags::DETACH).expect("Mount failed");
 }
 
 
