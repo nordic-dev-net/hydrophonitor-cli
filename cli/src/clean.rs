@@ -18,8 +18,8 @@ pub struct Clean {
 
 impl Clean {
     pub fn clean(&mut self) {
+        //create path to output folder
         let _mount;
-        //creating path to output folder
         let mut output_dir: PathBuf;
         match &self.device {
             Some(device) => output_dir = device.clone(),
@@ -30,31 +30,32 @@ impl Clean {
         }
         output_dir.push("output");
 
-        // Checking device for output folder
-        if !output_dir.is_dir() {
-            println!("{:?} is not a valid device! please select a hydrophonitor device with output folder!", output_dir);
-            return;
-        }
+        // Show deployments and ask for confirmation
+        match clean_lib::get_deployments_of_device(&output_dir) {
+            Some(deployments) => {
+                info!("Cleaning device at {:?}", self.device);
 
-        info!("Cleaning device at {:?}", self.device);
-
-        // Showing deployments and asking for confirmation
-        let deployments = clean_lib::get_deployments_of_device(&output_dir);
-        if !deployments.is_empty() {
-            dbg!(deployments);
-            println!("Do you really want to delete these deployments? (y/n)");
-            let mut user_input = String::new();
-            io::stdin().read_line(&mut user_input).expect("Failed to read line");
-            if !(user_input.contains("y") || user_input.contains("Y")) {
-                println!("Aborting!");
+                if !deployments.is_empty() {
+                    dbg!(deployments);
+                    println!("Do you really want to delete these deployments? (y/n)");
+                    let mut user_input = String::new();
+                    io::stdin().read_line(&mut user_input).expect("Failed to read line");
+                    if !(user_input.contains("y") || user_input.contains("Y")) {
+                        println!("Aborting!");
+                        return;
+                    }
+                } else {
+                    println!("The directory is already empty!");
+                    return;
+                }
+            }
+            None => {
+                println!("{:?} is not a valid device! please select a hydrophonitor device with output folder!", output_dir);
                 return;
             }
-        } else {
-            println!("The directory is already empty!");
-            return;
         }
 
-        // Cleaning device
+        // Clean device
         clean_lib::clear_directory(&output_dir);
         println!("Successfully cleaned directory!")
     }

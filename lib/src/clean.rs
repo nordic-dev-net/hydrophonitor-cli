@@ -1,7 +1,9 @@
 use std::fs;
 use std::path::PathBuf;
 
-pub fn get_deployments_of_device(output_dir: &PathBuf) -> Vec<String> {
+use log::warn;
+
+pub fn get_deployments_of_device(output_dir: &PathBuf) -> Option<Vec<String>> {
     match fs::read_dir(&output_dir) {
         Ok(dir) => {
             let mut entries = Vec::new();
@@ -12,10 +14,11 @@ pub fn get_deployments_of_device(output_dir: &PathBuf) -> Vec<String> {
                     entries.push(entry.file_name().into_string().unwrap());
                 }
             }
-            return entries;
+            return Some(entries);
         }
         Err(e) => {
-            panic!("Error opening the directory {:?}: {}", output_dir, e);
+            warn!("Error opening the directory {:?}: {}", output_dir, e);
+            return None;
         }
     }
 }
