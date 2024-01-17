@@ -41,7 +41,7 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
                 {
                     let read_dir_result = fs::read_dir(format!("{}/output", TEMP_MOUNT_PATH.to_str().unwrap()));
                     match read_dir_result {
-                        Ok(_) => { return Some(device); }
+                        Ok(_) => return Some(device),
                         Err(_) => {}
                     }
                 }
