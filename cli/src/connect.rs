@@ -5,6 +5,7 @@ use sys_mount::{Mount, UnmountDrop};
 
 use hydrophonitor_lib::connect as connect_lib;
 
+//Runs the connect wizard to select and mount the hydrophonitor device. It returns a mount object that defines the lifetime of the mount.
 pub fn connect() -> UnmountDrop<Mount> {
     let devices = connect_lib::get_device_list();
     let mut selected_device = &String::new();
