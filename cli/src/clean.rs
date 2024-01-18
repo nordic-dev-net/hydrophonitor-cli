@@ -1,8 +1,8 @@
-use std::io;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
+use dialoguer::Confirm;
 use log::info;
 
 use hydrophonitor_lib::{clean as clean_lib, connect};
@@ -38,10 +38,11 @@ impl Clean {
 
                 if !deployments.is_empty() {
                     dbg!(deployments);
-                    println!("Do you really want to delete these deployments? (y/n)");
-                    let mut user_input = String::new();
-                    io::stdin().read_line(&mut user_input).with_context(|| "Failed to read line")?;
-                    if !(user_input.contains('y') || user_input.contains('Y')) {
+
+                    if !Confirm::new()
+                        .with_prompt("Do you really want to delete these deployments? (y/n)")
+                        .default(true)
+                        .interact()? {
                         println!("Aborting!");
                         return Ok(());
                     }
