@@ -31,7 +31,7 @@ pub fn get_device_list() -> Result<Vec<String>> {
 }
 
 pub fn find_suitable_device(devices: &[String]) -> Result<Option<&String>> {
-    create_dir_if_not_existing(&TEMP_MOUNT_PATH);
+    create_dir_if_not_existing(&TEMP_MOUNT_PATH).with_context(|| format!("Failed to create dir {:?}", &*TEMP_MOUNT_PATH))?;
 
     //Checking all devices for an output directory
     for device in devices.iter() {
@@ -58,18 +58,20 @@ pub fn find_suitable_device(devices: &[String]) -> Result<Option<&String>> {
 
 pub fn mount_device(device: &String) -> Result<UnmountDrop<Mount>> {
     if unmount(&*MOUNT_PATH, UnmountFlags::empty()).is_ok() { debug!("unmounting previously mounted device at {:?}", &*MOUNT_PATH) }
-    create_dir_if_not_existing(&MOUNT_PATH);
+    create_dir_if_not_existing(&MOUNT_PATH).with_context(|| format!("Failed to create dir {:?}", &*MOUNT_PATH))?;
 
     let device_path = format!("/dev/{device}");
     Mount::builder().mount_autodrop(device_path, &*MOUNT_PATH, UnmountFlags::DETACH).with_context(|| "Mount failed")
 }
 
-fn create_dir_if_not_existing(dir_path: &PathBuf) {
+fn create_dir_if_not_existing(dir_path: &PathBuf) -> Result<()> {
     match fs::create_dir_all(dir_path) {
-        Ok(_) => {}
+        Ok(_) => Ok(()),
         Err(e) => {
-            if e.kind() != ErrorKind::AlreadyExists {
-                panic!("{}", e)
+            if e.kind() != ErrorKind::PermissionDenied {
+                Err(anyhow!("Please execute the command with sudo rights or specify a device path with access rights!"))
+            } else {
+                Err(anyhow!(e))
             }
         }
     }
