@@ -3,16 +3,19 @@ use clap_verbosity_flag::Verbosity;
 
 use crate::clean::Clean;
 use crate::import::Import;
+use crate::flash::Flash;
 
 mod import;
 mod clean;
 mod connect;
+mod flash;
 
 #[derive(Subcommand)]
 #[clap(about = "A tool to record audio on Linux using the command line.")]
 pub enum Commands {
     Import(Import),
     Clean(Clean),
+    Flash(Flash),
 }
 
 
@@ -36,6 +39,7 @@ fn main() {
     match commands {
         Commands::Import(mut import) => import.import(),
         Commands::Clean(mut clean) => clean.clean(),
+        Commands::Flash(mut flash) => flash.flash(),
     }
 }
 
