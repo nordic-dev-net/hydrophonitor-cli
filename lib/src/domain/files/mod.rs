@@ -7,6 +7,7 @@ pub use audio_file::AudioFile;
 pub use depth_file::DepthFile;
 pub use gps_file::GpsFile;
 pub use log_file::LogFile;
+pub use timestamped_file::TimestampedFile;
 
 use crate::domain::{get_file_name, Timestamp};
 use crate::domain::timestamp::TIMESTAMP_FORMAT;
@@ -15,6 +16,7 @@ mod audio_file;
 mod depth_file;
 mod gps_file;
 mod log_file;
+mod timestamped_file;
 
 fn try_from<F, T>(
     path_buf: PathBuf,
@@ -40,8 +42,8 @@ where
                 None => Err(anyhow!("file name does not match pattern")),
             }
         }.with_context(|| format!(
-            "file name of {file_type} file with path '{}' must start with a timestamp with format '{TIMESTAMP_FORMAT}' \
-            and end with suffix '{suffix_plain}'", path_buf.display()
+            "file name of {file_type} file with path '{}' must start with a timestamp with format '{}' \
+            and end with suffix '{suffix_plain}'", path_buf.display(), TIMESTAMP_FORMAT
         ))?;
 
         Ok(constructor(path_buf, timestamp))

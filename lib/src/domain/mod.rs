@@ -7,7 +7,7 @@ pub use deployment::Deployment;
 pub use device::Device;
 pub use output::Output;
 pub use timestamp::Timestamp;
-pub use files::{AudioFile, DepthFile, GpsFile, LogFile};
+pub use files::{AudioFile, DepthFile, GpsFile, LogFile, TimestampedFile};
 
 mod deployment;
 mod device;

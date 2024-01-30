@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 
+use crate::domain::files::timestamped_file::TimestampedFile;
 use crate::domain::files::try_from;
 use crate::domain::Timestamp;
 
@@ -28,5 +29,11 @@ impl TryFrom<PathBuf> for AudioFile {
 impl AsRef<Path> for AudioFile {
     fn as_ref(&self) -> &Path {
         &self.path_buf
+    }
+}
+
+impl TimestampedFile for AudioFile {
+    fn timestamp(&self) -> &Timestamp {
+        &self.timestamp
     }
 }

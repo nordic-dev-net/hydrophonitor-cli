@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use crate::domain::files::timestamped_file::TimestampedFile;
 use crate::domain::files::try_from;
 use crate::domain::Timestamp;
 
@@ -26,5 +27,11 @@ impl TryFrom<PathBuf> for DepthFile {
 impl AsRef<Path> for DepthFile {
     fn as_ref(&self) -> &Path {
         &self.path_buf
+    }
+}
+
+impl TimestampedFile for DepthFile {
+    fn timestamp(&self) -> &Timestamp {
+        &self.timestamp
     }
 }
