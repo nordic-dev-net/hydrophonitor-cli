@@ -6,6 +6,7 @@ use crate::import::Import;
 
 mod import;
 mod clean;
+mod connect;
 
 #[derive(Subcommand)]
 #[clap(about = "A tool to record audio on Linux using the command line.")]
@@ -32,9 +33,13 @@ fn main() {
 
     env_logger::builder().filter_level(verbose.log_level_filter()).init();
 
-    match commands {
+    let result = match commands {
         Commands::Import(mut import) => import.import(),
         Commands::Clean(mut clean) => clean.clean(),
+    };
+
+    if let Err(err) = result {
+        println!("{err:?}")
     }
 }
 

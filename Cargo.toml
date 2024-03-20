@@ -9,8 +9,12 @@ members = [
 anyhow = "1.0.70"
 clap = { version = "4.1.11", features = ["derive"] }
 clap-verbosity-flag = "2.1.0"
+dialoguer = "0.11.0"
+dirs = "5.0.1"
 env_logger = "0.10.1"
 hound = "3.5.0"
 indicatif = "0.17.3"
+lazy_static = "1.4.0"
 log = "0.4"
+sys-mount = "2.1.0"
 walkdir = "2.3.3"

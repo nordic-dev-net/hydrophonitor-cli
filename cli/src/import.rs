@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use anyhow::Result;
 use clap::Parser;
 
 use hydrophonitor_lib::import::import;
@@ -28,7 +29,8 @@ pub struct Import {
 
 impl Import {
     //TODO old logic; has to be changed to match new commands
-    pub fn import(&mut self) {
-        import(&mut self.device, self.output.clone())
+    pub fn import(&mut self) -> Result<()> {
+        import(&mut self.device, self.output.clone());
+        Ok(())
     }
 }
