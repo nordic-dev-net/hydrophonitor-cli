@@ -41,5 +41,4 @@ pub(crate) fn manual_connect(devices: &[String]) -> &String {
         .default(0)
         .interact();
     &devices[selection.unwrap_or_default()]
-    //TODO security question
 }

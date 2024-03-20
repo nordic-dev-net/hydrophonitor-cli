@@ -1,7 +1,7 @@
+use std::io;
 use std::path::PathBuf;
 
 use clap::Parser;
-use log::error;
 
 use hydrophonitor_lib::connect as connect_lib;
 use hydrophonitor_lib::device_type::DeviceType;
@@ -25,12 +25,29 @@ impl Flash {
             Some(device) => device.clone(),
             None => select_device()
         };
-        println!("Flashing device {:?} with image {:?}, this may take a while...", device_path, &self.image);
-        flash_lib::flash(&self.image, &device_path).unwrap_or_else(|err| {
-            error!("Error: {}", err);
-            std::process::exit(1);
-        });
-        println!("Flashing finished!");
+
+        //Confirmation question
+        println!("Do you really want to flash the Hydrophonitor OS to the device {device_path:?}? All data on this device will be lost!");
+        let mut user_input = String::new();
+        io::stdin().read_line(&mut user_input).expect("Failed to read line!");
+        match user_input.trim().to_lowercase().as_str() {
+            "y" | "yes" => (),
+            "n" | "no" => {
+                println!("Aborting!");
+                return;
+            }
+            _ => {
+                println!("Invalid response. Please enter 'y' or 'n'.");
+                return;
+            }
+        }
+
+        //Flashing
+        println!("Flashing device {:?} with image {:?}, this may take a while...", &device_path, &self.image);
+        match flash_lib::flash(&self.image, &device_path) {
+            Ok(_) => println!("Flashing finished!"),
+            Err(err) => println!("Flashing failed due to error: {}, aborting!", err),
+        };
     }
 }
 
