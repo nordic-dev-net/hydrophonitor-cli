@@ -4,11 +4,20 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 
 pub fn flash(image_path: &PathBuf, device_path: &PathBuf) -> Result<(), Box<dyn Error>> {
+    /*
+    let output = Command::new("dd")
+        .arg(&*format!("if={image_path:?}"))
+        .arg(&*format!("of={device_path:?}"))
+        .arg("bs=4M")
+        .output()
+        .expect("Failed to run dd!");
+     */
+
     // Open source file for reading
     let mut source_file = File::open(image_path).expect(&*format!("Failed to open image {:?}!", image_path));
 
     // Open destination file for writing
-    let mut dest_file = File::open(device_path).expect(&*format!("Failed to open device file {:?}!", device_path));
+    let mut dest_file = File::create(device_path).expect(&*format!("Failed to open device file {:?}!", device_path));
 
     // Set buffer size for read and write operations
     let mut buffer = [0; 4096]; // Adjust the buffer size as needed

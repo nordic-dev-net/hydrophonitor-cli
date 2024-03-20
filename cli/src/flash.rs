@@ -3,11 +3,9 @@ use std::path::PathBuf;
 use clap::Parser;
 use log::error;
 
-use hydrophonitor_lib::connect;
+use hydrophonitor_lib::connect as connect_lib;
 use hydrophonitor_lib::device_type::DeviceType;
 use hydrophonitor_lib::flash as flash_lib;
-
-use crate::connect::connect;
 
 #[derive(Parser, Debug)]
 #[clap(about = "This command flashes a SD card or USB mass storage with the selected version of the Hydrophonitor system.")]
@@ -23,22 +21,23 @@ pub struct Flash {
 
 impl Flash {
     pub fn flash(&mut self) {
-        let _mount;
-        let device_path;
-        match &self.device {
-            Some(device) => device_path = device,
-            None => {
-                _mount = connect(DeviceType::Disk);
-                device_path = &connect::MOUNT_PATH;
-            }
-        }
+        let device_path = match &self.device {
+            Some(device) => device.clone(),
+            None => select_device()
+        };
         println!("Flashing device {:?} with image {:?}, this may take a while...", device_path, &self.image);
-        flash_lib::flash(&self.image, device_path).unwrap_or_else(|err| {
+        flash_lib::flash(&self.image, &device_path).unwrap_or_else(|err| {
             error!("Error: {}", err);
             std::process::exit(1);
         });
         println!("Flashing finished!");
     }
+}
+
+fn select_device() -> PathBuf {
+    let devices = connect_lib::get_device_list(DeviceType::Disk);
+    let selected_device = crate::connect::manual_connect(&devices);
+    PathBuf::from(format!("/dev/{selected_device}"))
 }
 
 
