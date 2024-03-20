@@ -7,13 +7,15 @@ use lazy_static::lazy_static;
 use log::debug;
 use sys_mount::{Mount, unmount, UnmountDrop, UnmountFlags};
 
+use crate::device_type::DeviceType;
+
 lazy_static! {
 pub static ref MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/device");
 static ref TEMP_MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/temp_device");
 }
 
 //gets all available devices with lsblk
-pub fn get_device_list() -> Vec<String> {
+pub fn get_device_list(device_type: DeviceType) -> Vec<String> {
     let output = Command::new("lsblk").arg("-l").output().expect("Failed to run lsblk!");
     let output = String::from_utf8_lossy(&output.stdout);
     let devices: Vec<&str> = output.lines().collect();
@@ -21,8 +23,8 @@ pub fn get_device_list() -> Vec<String> {
     for device in devices.iter() {
         let mut device_columns = device.split_whitespace();
         let cropped_device = device_columns.next().unwrap_or_default().to_string();
-        let device_type = device_columns.nth(4);
-        if device_type.unwrap_or_default() == "part" {
+        let actual_device_type = device_columns.nth(4);
+        if actual_device_type.unwrap_or_default() == device_type.as_str() {
             devices_cropped.push(cropped_device);
         }
     }
@@ -40,9 +42,8 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
             Ok(_) =>
                 {
                     let read_dir_result = fs::read_dir(format!("{}/output", TEMP_MOUNT_PATH.to_str().unwrap()));
-                    match read_dir_result {
-                        Ok(_) => return Some(device),
-                        Err(_) => {}
+                    if read_dir_result.is_ok() {
+                        return Some(device);
                     }
                 }
             Err(e) => {
@@ -58,9 +59,8 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
 }
 
 pub fn mount_device(device: &String) -> UnmountDrop<Mount> {
-    match unmount(&*MOUNT_PATH, UnmountFlags::empty()) {
-        Ok(_) => debug!("unmounting previously mounted device at {:?}", &*MOUNT_PATH),
-        Err(_) => {}
+    if unmount(&*MOUNT_PATH, UnmountFlags::empty()).is_ok() {
+        debug!("unmounting previously mounted device at {:?}", &*MOUNT_PATH)
     }
     create_dir_if_not_existing(&*MOUNT_PATH);
 

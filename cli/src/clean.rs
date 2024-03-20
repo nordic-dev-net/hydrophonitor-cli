@@ -5,6 +5,7 @@ use clap::Parser;
 use log::info;
 
 use hydrophonitor_lib::{clean as clean_lib, connect};
+use hydrophonitor_lib::device_type::DeviceType;
 
 use crate::connect::connect;
 
@@ -24,7 +25,7 @@ impl Clean {
         match &self.device {
             Some(device) => output_dir = device.clone(),
             None => {
-                _mount = connect();
+                _mount = connect(DeviceType::Part);
                 output_dir = connect::MOUNT_PATH.clone();
             }
         }

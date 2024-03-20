@@ -4,10 +4,14 @@ use dialoguer::Select;
 use sys_mount::{Mount, UnmountDrop};
 
 use hydrophonitor_lib::connect as connect_lib;
+use hydrophonitor_lib::device_type::DeviceType;
 
-//Runs the connect wizard to select and mount the hydrophonitor device. It returns a mount object that defines the lifetime of the mount.
-pub fn connect() -> UnmountDrop<Mount> {
-    let devices = connect_lib::get_device_list();
+
+// Runs the connect wizard to select and mount the hydrophonitor device.
+// The device type specifies which type of devices which should be listed.
+// It returns a mount object that defines the lifetime of the mount.
+pub fn connect(device_type: DeviceType) -> UnmountDrop<Mount> {
+    let devices = connect_lib::get_device_list(device_type);
     let mut selected_device = &String::new();
     match connect_lib::find_suitable_device(&devices) {
         Some(dev) => {
@@ -28,14 +32,15 @@ pub fn connect() -> UnmountDrop<Mount> {
 
     let mount = connect_lib::mount_device(selected_device);
     println!("successfully connected to device {selected_device}!");
-    return mount;
+    mount
 }
 
-fn manual_connect(devices: &Vec<String>) -> &String {
+fn manual_connect(devices: &[String]) -> &String {
     let selection = Select::new()
         .with_prompt("Please choose a device from the list:")
-        .items(&devices)
+        .items(devices)
         .default(0)
         .interact();
     &devices[selection.unwrap_or_default()]
+    //TODO security question
 }
