@@ -26,6 +26,7 @@ impl Flash {
             None => select_device()
         };
 
+        //TODO change to use dialoguer
         //Confirmation question
         println!("Do you really want to flash the Hydrophonitor OS to the device {device_path:?}? All data on this device will be lost!");
         let mut user_input = String::new();

@@ -1,8 +1,9 @@
-use std::{fs, process};
+use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::process::Command;
 
+use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use log::debug;
 use sys_mount::{Mount, unmount, UnmountDrop, UnmountFlags};
@@ -15,8 +16,8 @@ static ref TEMP_MOUNT_PATH: PathBuf = PathBuf::from("/var/lib/hydrophonitor/temp
 }
 
 //gets all available devices with lsblk
-pub fn get_device_list(device_type: DeviceType) -> Vec<String> {
-    let output = Command::new("lsblk").arg("-l").output().expect("Failed to run lsblk!");
+pub fn get_device_list(device_type: DeviceType) -> Result<Vec<String>> {
+    let output = Command::new("lsblk").arg("-l").output().with_context(|| "Failed to run lsblk!")?;
     let output = String::from_utf8_lossy(&output.stdout);
     let devices: Vec<&str> = output.lines().collect();
     let mut devices_cropped: Vec<String> = Vec::new();
@@ -28,11 +29,11 @@ pub fn get_device_list(device_type: DeviceType) -> Vec<String> {
             devices_cropped.push(cropped_device);
         }
     }
-    devices_cropped
+    Ok(devices_cropped)
 }
 
-pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
-    create_dir_if_not_existing(&*TEMP_MOUNT_PATH);
+pub fn find_suitable_device(devices: &[String]) -> Result<Option<&String>> {
+    create_dir_if_not_existing(&TEMP_MOUNT_PATH).with_context(|| format!("Failed to create dir {:?}", &*TEMP_MOUNT_PATH))?;
 
     //Checking all devices for an output directory
     for device in devices.iter() {
@@ -43,38 +44,38 @@ pub fn find_suitable_device(devices: &Vec<String>) -> Option<&String> {
                 {
                     let read_dir_result = fs::read_dir(format!("{}/output", TEMP_MOUNT_PATH.to_str().unwrap()));
                     if read_dir_result.is_ok() {
-                        return Some(device);
+                        return Ok(Some(device));
                     }
                 }
             Err(e) => {
                 if e.kind() == ErrorKind::PermissionDenied {
-                    println!("Please execute the command with sudo rights or specify a device path with access rights!");
-                    process::exit(1)
+                    return Err(anyhow!("Please execute the command with sudo rights or specify a device path with access rights!"));
                 }
                 debug!("Mount of device {device_path} failed: {e}")
             }
         }
     }
-    None
+    Ok(None)
 }
 
-pub fn mount_device(device: &String) -> UnmountDrop<Mount> {
+pub fn mount_device(device: &String) -> Result<UnmountDrop<Mount>> {
     if unmount(&*MOUNT_PATH, UnmountFlags::empty()).is_ok() {
         debug!("unmounting previously mounted device at {:?}", &*MOUNT_PATH)
     }
-    create_dir_if_not_existing(&*MOUNT_PATH);
+    create_dir_if_not_existing(&MOUNT_PATH).with_context(|| format!("Failed to create dir {:?}", &*MOUNT_PATH))?;
 
     let device_path = format!("/dev/{device}");
-    return Mount::builder().mount_autodrop(&device_path, &*MOUNT_PATH, UnmountFlags::DETACH).expect("Mount failed");
+    Mount::builder().mount_autodrop(device_path, &*MOUNT_PATH, UnmountFlags::DETACH).with_context(|| "Mount failed")
 }
 
-
-fn create_dir_if_not_existing(dir_path: &PathBuf) {
+fn create_dir_if_not_existing(dir_path: &PathBuf) -> Result<()> {
     match fs::create_dir_all(dir_path) {
-        Ok(_) => {}
+        Ok(_) => Ok(()),
         Err(e) => {
-            if e.kind() != ErrorKind::AlreadyExists {
-                panic!("{}", e)
+            if e.kind() != ErrorKind::PermissionDenied {
+                Err(anyhow!("Please execute the command with sudo rights or specify a device path with access rights!"))
+            } else {
+                Err(anyhow!(e))
             }
         }
     }

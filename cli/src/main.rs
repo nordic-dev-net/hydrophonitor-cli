@@ -2,8 +2,8 @@ use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
 
 use crate::clean::Clean;
-use crate::import::Import;
 use crate::flash::Flash;
+use crate::import::Import;
 
 mod import;
 mod clean;
@@ -36,10 +36,14 @@ fn main() {
 
     env_logger::builder().filter_level(verbose.log_level_filter()).init();
 
-    match commands {
+    let result = match commands {
         Commands::Import(mut import) => import.import(),
         Commands::Clean(mut clean) => clean.clean(),
-        Commands::Flash(mut flash) => flash.flash(),
+        Commands::Flash(mut flash) => Ok(flash.flash()),    //TODO adjust result from flash to match new error handling
+    };
+
+    if let Err(err) = result {
+        println!("{err:?}")
     }
 }
 

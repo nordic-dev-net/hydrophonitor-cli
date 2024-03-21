@@ -1,7 +1,8 @@
-use std::io;
 use std::path::PathBuf;
 
+use anyhow::{anyhow, Context, Result};
 use clap::Parser;
+use dialoguer::Confirm;
 use log::info;
 
 use hydrophonitor_lib::{clean as clean_lib, connect};
@@ -17,14 +18,14 @@ pub struct Clean {
 }
 
 impl Clean {
-    pub fn clean(&mut self) {
+    pub fn clean(&mut self) -> Result<()> {
         //create path to output folder
         let _mount;
         let mut output_dir: PathBuf;
         match &self.device {
             Some(device) => output_dir = device.clone(),
             None => {
-                _mount = connect();
+                _mount = connect().with_context(|| "connecting to device failed:")?;
                 output_dir = connect::MOUNT_PATH.clone();
             }
         }
@@ -37,26 +38,27 @@ impl Clean {
 
                 if !deployments.is_empty() {
                     dbg!(deployments);
-                    println!("Do you really want to delete these deployments? (y/n)");
-                    let mut user_input = String::new();
-                    io::stdin().read_line(&mut user_input).expect("Failed to read line");
-                    if !(user_input.contains("y") || user_input.contains("Y")) {
+
+                    if !Confirm::new()
+                        .with_prompt("Do you really want to delete these deployments? (y/n)")
+                        .default(true)
+                        .interact()? {
                         println!("Aborting!");
-                        return;
+                        return Ok(());
                     }
                 } else {
                     println!("The directory is already empty!");
-                    return;
+                    return Ok(());
                 }
             }
             None => {
-                println!("{:?} is not a valid device! please select a hydrophonitor device with output folder!", output_dir);
-                return;
+                return Err(anyhow!("{output_dir:?} is not a valid device! please select a hydrophonitor device with output folder!"));
             }
         }
 
         // Clean device
-        clean_lib::clear_directory(&output_dir);
-        println!("Successfully cleaned directory!")
+        clean_lib::clear_directory(&output_dir).with_context(|| "Error cleaning directory")?;
+        println!("Successfully cleaned directory!");
+        Ok(())
     }
 }

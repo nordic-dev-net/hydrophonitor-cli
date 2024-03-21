@@ -1,40 +1,38 @@
-use std::io;
-
-use dialoguer::Select;
+use anyhow::{Context, Result};
+use dialoguer::{Confirm, Select};
 use sys_mount::{Mount, UnmountDrop};
 
 use hydrophonitor_lib::connect as connect_lib;
 use hydrophonitor_lib::device_type::DeviceType;
 
-// Runs the connect wizard to select and mount the hydrophonitor device.
-// The device type specifies which type of devices which should be listed.
-// It returns a mount object that defines the lifetime of the mount.
-pub fn connect() -> UnmountDrop<Mount> {
-    let devices = connect_lib::get_device_list(DeviceType::Part);
-    let mut selected_device = &String::new();
-    match connect_lib::find_suitable_device(&devices) {
+//Runs the connect wizard to select and mount the hydrophonitor device. It returns a mount object that defines the lifetime of the mount.
+pub fn connect() -> Result<UnmountDrop<Mount>> {
+    let devices = connect_lib::get_device_list(DeviceType::Part).with_context(|| "Failed to get device list")?;
+    let suitable_device = connect_lib::find_suitable_device(&devices).with_context(|| "Getting device failed")?;
+    let selected_device = match suitable_device {
         Some(dev) => {
-            println!("Found potential Hydrophonitor device {dev}. Do you want to connect to this device? (y/n)");
-            let mut user_input = String::new();
-            io::stdin().read_line(&mut user_input).expect("Failed to read line!");
-            match user_input.trim().to_lowercase().as_str() {
-                "y" | "yes" => selected_device = dev,
-                "n" | "no" => selected_device = manual_connect(&devices),
-                _ => println!("Invalid response. Please enter 'y' or 'n'."),
+            let connect_to_device = Confirm::new()
+                .with_prompt(format!("Found potential Hydrophonitor device '{dev}'. Do you want to connect to this device?"))
+                .default(true)
+                .interact()?;
+            if connect_to_device {
+                dev
+            } else {
+                manual_connect(&devices)
             }
         }
         None => {
             println!("No device found matching the Hydrophonitor disk.");
-            selected_device = manual_connect(&devices);
+            manual_connect(&devices)
         }
-    }
+    };
 
-    let mount = connect_lib::mount_device(selected_device);
+    let mount = connect_lib::mount_device(selected_device).with_context(|| "Mounting device failed")?;
     println!("successfully connected to device {selected_device}!");
-    mount
+    Ok(mount)
 }
 
-pub(crate) fn manual_connect(devices: &[String]) -> &String {
+fn manual_connect(devices: &[String]) -> &String {
     let selection = Select::new()
         .with_prompt("Please choose a device from the list:")
         .items(devices)

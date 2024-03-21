@@ -184,10 +184,11 @@ Options:
 ### 4. Flash
 
 ```
-Usage: hp-cli flash [OPTIONS] --device <DEVICE>
+Usage: hp-cli flash [OPTIONS] --device <DEVICE> --image <IMAGE>
 
 Options:
   -d, --device          Path to USB mass storage or SD card where data                                         will be deleted from.
+  -i, --image           Path to the image that will be flashed to the devie
   -h, --help            Displays help for available commands. All                                              other arguments are ignored.
   -v, --verbose         Increase CLI verbosity.
 ```
