@@ -39,7 +39,7 @@ fn main() {
     let result = match commands {
         Commands::Import(mut import) => import.import(),
         Commands::Clean(mut clean) => clean.clean(),
-        Commands::Flash(mut flash) => Ok(flash.flash()),    //TODO adjust result from flash to match new error handling
+        Commands::Flash(mut flash) => flash.flash(),
     };
 
     if let Err(err) = result {

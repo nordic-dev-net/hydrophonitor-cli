@@ -1,7 +1,8 @@
-use std::io;
 use std::path::PathBuf;
 
+use anyhow::{Context, Result};
 use clap::Parser;
+use dialoguer::Confirm;
 
 use hydrophonitor_lib::connect as connect_lib;
 use hydrophonitor_lib::device_type::DeviceType;
@@ -20,42 +21,33 @@ pub struct Flash {
 }
 
 impl Flash {
-    pub fn flash(&mut self) {
+    pub fn flash(&mut self) -> Result<()> {
         let device_path = match &self.device {
             Some(device) => device.clone(),
-            None => select_device()
+            None => select_device().with_context(|| "Failed to select device")?
         };
 
-        //TODO change to use dialoguer
         //Confirmation question
-        println!("Do you really want to flash the Hydrophonitor OS to the device {device_path:?}? All data on this device will be lost!");
-        let mut user_input = String::new();
-        io::stdin().read_line(&mut user_input).expect("Failed to read line!");
-        match user_input.trim().to_lowercase().as_str() {
-            "y" | "yes" => (),
-            "n" | "no" => {
-                println!("Aborting!");
-                return;
-            }
-            _ => {
-                println!("Invalid response. Please enter 'y' or 'n'.");
-                return;
-            }
+        let use_device = Confirm::new()
+            .with_prompt(format!("Do you really want to flash the Hydrophonitor OS to the device {device_path:?}? All data on this device will be lost!"))
+            .default(true)
+            .interact()?;
+        if !use_device {
+            println!("Aborting!");
+            return Ok(());
         }
 
         //Flashing
         println!("Flashing device {:?} with image {:?}, this may take a while...", &device_path, &self.image);
-        match flash_lib::flash(&self.image, &device_path) {
-            Ok(_) => println!("Flashing finished!"),
-            Err(err) => println!("Flashing failed due to error: {}, aborting!", err),
-        };
+        flash_lib::flash(&self.image, &device_path).with_context(|| "Flashing device failed")?;
+        Ok(())
     }
 }
 
-fn select_device() -> PathBuf {
-    let devices = connect_lib::get_device_list(DeviceType::Disk);
+fn select_device() -> Result<PathBuf> {
+    let devices = connect_lib::get_device_list(DeviceType::Disk).with_context(|| "Failed to get device list")?;
     let selected_device = crate::connect::manual_connect(&devices);
-    PathBuf::from(format!("/dev/{selected_device}"))
+    Ok(PathBuf::from(format!("/dev/{selected_device}")))
 }
 
 

@@ -32,7 +32,7 @@ pub fn connect() -> Result<UnmountDrop<Mount>> {
     Ok(mount)
 }
 
-fn manual_connect(devices: &[String]) -> &String {
+pub(crate) fn manual_connect(devices: &[String]) -> &String {
     let selection = Select::new()
         .with_prompt("Please choose a device from the list:")
         .items(devices)
