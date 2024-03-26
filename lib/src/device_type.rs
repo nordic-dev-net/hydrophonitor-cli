@@ -1,3 +1,4 @@
+// Is used to select which devices  of which type should be shown in the connect wizard.
 pub enum DeviceType {
     Part,
     Disk,

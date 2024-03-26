@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use anyhow::{Context, Error};
+use anyhow::{Context, Result};
 use log::warn;
 
 pub fn get_deployments_of_device(output_dir: &PathBuf) -> Option<Vec<String>> {
@@ -21,7 +21,7 @@ pub fn get_deployments_of_device(output_dir: &PathBuf) -> Option<Vec<String>> {
     }
 }
 
-pub fn clear_directory(output_dir: &PathBuf) -> Result<(), Error> {
+pub fn clear_directory(output_dir: &PathBuf) -> Result<()> {
     fs::remove_dir_all(output_dir).with_context(|| format!("Removing everything in directory {:?} failed", &output_dir))?;
     fs::create_dir(output_dir).with_context(|| format!("Creating new empty output directory in {:?} failed", &output_dir))?;
     Ok(())
