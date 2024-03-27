@@ -19,8 +19,8 @@ pub struct Clean {
 
 impl Clean {
     pub fn clean(&mut self) -> Result<()> {
-        //create path to output folder
-        let _mount;
+        //creating path to output folder
+        let _mount;     //device is mounted as long as this variable is in scope
         let mut output_dir: PathBuf;
         match &self.device {
             Some(device) => output_dir = device.clone(),
@@ -31,7 +31,7 @@ impl Clean {
         }
         output_dir.push("output");
 
-        // Show deployments and ask for confirmation
+        // Printing deployments and asking for confirmation
         match clean_lib::get_deployments_of_device(&output_dir) {
             Some(deployments) => {
                 info!("Cleaning device at {:?}", self.device);
@@ -56,7 +56,7 @@ impl Clean {
             }
         }
 
-        // Clean device
+        // Cleaning device
         clean_lib::clear_directory(&output_dir).with_context(|| "Error cleaning directory")?;
         println!("Successfully cleaned directory!");
         Ok(())
